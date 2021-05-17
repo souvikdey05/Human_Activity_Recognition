@@ -1,0 +1,232 @@
+
+######
+# Main
+######
+
+main.models = [
+    {
+        'model': 'simple_gru',
+        'units': 5,
+        'activation': 'relu',
+    }
+]
+
+
+    # main.models examples --------->
+    # 1. Simple RNN model specs  --> Sequence to Sequence and Sequence to Label
+    #   {
+    #       'model': 'simple_rnn',
+    #       'units': 10, # (optional), default: 20
+    #       'activation': 'relu', # (optional), default: 'tanh'
+    #   }
+    # 2. Simple LSTM model specs  --> Sequence to Sequence and Sequence to Label
+    #   {
+    #       'model': 'simple_lstm',
+    #       'units': 10, # (optional), default: 20
+    #       'activation': 'relu', # (optional), default: 'tanh'
+    #   }
+    # 3. Simple GRU model specs  --> Sequence to Sequence and Sequence to Label
+    #   {
+    #       'model': 'simple_gru',
+    #       'units': 10, # (optional), default: 20
+    #       'activation': 'relu', # (optional), default: 'tanh'
+    #   }
+    # 4. Bidirectional RNN model specs  --> Sequence to Sequence
+    #   {
+    #       'model': 'bidirectional_rnn',
+    #       'units': 10, # (optional), default: 20
+    #       'activation': 'relu', # (optional), default: 'tanh'
+    #   }
+    # 5. Bidirectional LSTM model specs  --> Sequence to Sequence
+    #   {
+    #       'model': 'bidirectional_lstm',
+    #       'units': 10, # (optional), default: 20
+    #       'activation': 'relu', # (optional), default: 'tanh'
+    #   }
+    # 6. Bidirectional LSTM model specs  --> Sequence to Sequence
+    #   {
+    #       'model': 'bidirectional_gru',
+    #       'units': 10, # (optional), default: 20
+    #       'activation': 'relu', # (optional), default: 'tanh'
+    #   }
+    # 7. Stacked RNN model specs  --> Sequence to Sequence and Sequence to Label
+    #   {
+    #       'model': 'stacked_rnn',
+    #       'units': [10, 10], # (optional), default: [20, 10] , list of two or more units of stacked lstm layers
+    #       'activation': 'relu', # (optional), default: 'tanh'
+    #   }
+    # 8. Stacked LSTM model specs  --> Sequence to Sequence and Sequence to Label
+    #   {
+    #       'model': 'stacked_lstm',
+    #       'units': [10, 10], # (optional), default: [20, 10] , list of two or more units of stacked lstm layers
+    #       'activation': 'relu', # (optional), default: 'tanh'
+    #   }
+    # 9. Stacked GRU model specs  --> Sequence to Sequence and Sequence to Label
+    #   {
+    #       'model': 'stacked_gru',
+    #       'units': [10, 10], # (optional), default: [20, 10] , list of two or more units of stacked lstm layers
+    #       'activation': 'relu', # (optional), default: 'tanh'
+    #   }
+
+    # If no model is trained but one is evaluated, then the path to a checkpoint of a model has to given here.
+
+    # Directory or file. File like: '/path/to/checkpoints/ckpt-04', 
+    # a checkpoint 'file' like 'ckpt-04' consists of index and data files, but the prefix is given.
+    # If a directory is given, then the latest checkpoint is loaded.
+main.evaluation_checkpoint = ''
+
+
+    # Empty string in 'main.resume_checkpoint' and 'main.resume_model_path' means no resuming.
+    # If multiple models are to be trained, then only the first one in the list 'main.model' is resumed from checkpoint.
+    # If 'resume_model_path' is empty, then 'resume_checkpoint' is evaluated as the path to a checkpoint dir. or file,
+    # otherwise 'main.resume_checkpoint' is evaluated as the checkpoint prefix, like 'ckpt-04'.
+    # File like 'main.evaluation_checkpoint'.
+    # 'main.resume_model_path' is the path to the directory of a model, which contains the directories 'checkpoint' and 'summaries'.
+    # If 'main.resume_model_path' is given, then it is used to load the train/val. summaries, so that they can be continued.
+    # Resuming is only implemented for non-hyperparameter_tuning training.
+main.resume_checkpoint = ''
+main.resume_model_path = ''
+
+main.use_knowledge_distillation = False
+
+main.use_hyperparameter_tuning = False
+
+
+
+######
+# Tune
+######
+
+    # Hyperparameters for Tensorboard HParams
+hyperparameter_tuning.simple_models_params = {
+    'dataset_window_size' :  [50, 100, 150, 200, 250, 300, 350],
+    'dataset_window_shift_ratio': [10, 25, 50, 75, 100],
+    'units': {
+        'min': 5,
+        'max': 30,  # Must be int
+        'n_search': 2 # n_search Uniform Random search
+    },
+    'activation': ['relu', 'tanh'] # Grid Search
+}
+
+hyperparameter_tuning.stacked_two_layer_models_params = {
+    'dataset_window_size' :  [50, 100, 150, 200, 250, 300, 350],
+    'dataset_window_shift_ratio': [10, 25, 50, 75, 100],
+    'units_1': {
+        'min': 5,
+        'max': 30,  # Must be int
+        'n_search': 2 # n_search Uniform Random search
+    },
+    'units_2': {
+        'min': 5,
+        'max': 30,  # Must be int
+        'n_search': 2 # n_search Uniform Random search
+    },
+    'activation': ['relu', 'tanh'] # Grid Search
+}
+
+
+
+#######
+# Train
+#######
+
+Trainer.epochs =                 300 # 1e5
+Trainer.log_interval =           100 # 1e4
+Trainer.checkpoint_interval =    5000 # 1e4
+Trainer.learning_rate =          0.001
+
+    # Early-stopping:
+    # Number of epochs between early-stopping tests. Setting this to zero disables early-stopping. One is standart, not for intensive tests, use 100.
+Trainer.early_stopping_test_interval = 0
+    # Types:
+    # 0: Relative: Stopping if the metric does not improve between epochs over a value of patience (number of) epochs by a value of minimum_delta.
+    # 1: Average: Stopping if the average of the metric over a value of patience (number of) epochs is not an improvement by at least the value of minimum_delta.
+Trainer.early_stopping_trigger_type = 0
+Trainer.early_stopping_metric = 'mcc' # One of: ['Accuracy', 'Precision', 'Recall', 'F1', 'Specificity', 'MCC']
+Trainer.patience = 1000 #20
+Trainer.minimum_delta = 1e-6
+Trainer.early_stopping_delay = 1000
+    # Number of epochs before the early-stopping testing starts
+
+
+KDTrainer.epochs =                 500 # 1e5
+KDTrainer.log_interval =           100 # 1e4
+KDTrainer.checkpoint_interval =    5000 # 1e4
+KDTrainer.learning_rate =          0.001
+KDTrainer.temperature = 5.0
+KDTrainer.alpha = 0.9
+KDTrainer.beta = 0.1
+KDTrainer.early_stopping_test_interval = 0
+KDTrainer.early_stopping_trigger_type = 0
+KDTrainer.early_stopping_metric = 'mcc' # One of: ['Accuracy', 'Precision', 'Recall', 'F1', 'Specificity', 'MCC']
+KDTrainer.patience = 1000 #20
+KDTrainer.minimum_delta = 1e-6
+KDTrainer.early_stopping_delay = 1000
+
+
+#---------------
+# Input pipeline
+#---------------
+
+############
+# DataLoader
+############
+
+DataLoader.dataset_name = 'hapt' # Available datasets: 'hapt' and 'rw', rw: RealWorld.
+DataLoader.sensor_position = 'shin' # ('head', 'upperarm', 'forearm', 'chest', 'waist', 'thigh', 'shin')
+    # The RealWorld dataset includes data for different sensor positions, select one.
+    # This only applies when choosing the RealWorld dataset. 'shin' is recommended.
+
+DataLoader.dataset_directory = 'C:\\Universitat Stuttgart\\Semester 3\\Practical Course - Deep Learning Lab\\Workspace\\Sprint-01\\dl-lab-2020-team10\\dataset\\HAPT_dataset'
+    # 'C:\\Universitat Stuttgart\\Semester 3\\Practical Course - Deep Learning Lab\\Workspace\\Sprint-01\\dl-lab-2020-team10\\dataset\\RW_dataset'
+    # 'C:\\Universitat Stuttgart\\Semester 3\\Practical Course - Deep Learning Lab\\Workspace\\Sprint-01\\dl-lab-2020-team10\\dataset\\HAPT_dataset'
+    # '/media/lenovo4/int_ssd/Datasets/HAPT_Data_Set'
+    # '/media/lenovo4/int_ssd/Datasets/realworld2016_dataset/'
+    # '/content/gdrive/MyDrive/DL Lab/dl-lab-2020-team10/dataset/HAPT_dataset'
+    # '/home/data/HAPT_dataset'
+
+
+DataLoader.tfrecords_directory = 'C:\\Universitat Stuttgart\\Semester 3\\Practical Course - Deep Learning Lab\\Workspace\\Sprint-01\\dl-lab-2020-team10\\dataset\\TFRecord_HAPT'
+    # 'C:\\Universitat Stuttgart\\Semester 3\\Practical Course - Deep Learning Lab\\Workspace\\Sprint-01\\dl-lab-2020-team10\\dataset\\TFRecord_RW'
+    # 'C:\\Universitat Stuttgart\\Semester 3\\Practical Course - Deep Learning Lab\\Workspace\\Sprint-01\\dl-lab-2020-team10\\dataset\\TFRecord_HAPT'
+    # '/media/lenovo4/int_ssd/Datasets/HAPT_Data_Set/tfrecords'
+    # '/media/lenovo4/int_ssd/Datasets/realworld2016_dataset/tfrecords'
+    # '/content/gdrive/MyDrive/DL Lab/dl-lab-2020-team10/dataset/TFRecord_HAPT'
+    # '/home/RUS_CIP/st169851/DL_Lab/dataset/TFRecord_HAPT'
+
+DataLoader.create_tfrecords = False
+    # If True create tfrecords in tfrecords_directory, else load tfrecords.
+
+DataLoader.sequence_to_label = False
+
+
+
+##########
+# Datasets
+##########
+
+load.window_size = 250
+load.window_shift = 125
+
+prepare_dataset.batch_size = 32 # Zero for no batching.
+prepare_dataset.caching = True
+prepare_dataset.shuffle = True
+prepare_dataset.repeat = True
+prepare_dataset.prefetch = True
+
+
+
+#---------------
+# Models
+#---------------
+
+##########
+# Knowledge Distillation
+##########
+KnowledgeDistill.teacher_model_desc = {
+    'model': 'simple_gru',
+    'units': 30,
+    'activation': 'relu',
+}
+
