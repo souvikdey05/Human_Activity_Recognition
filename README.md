@@ -1,7 +1,7 @@
 # Human_Activity_Recognition
 
 # Info
-This branch is for Sprint-01
+This is the main branch
 
 
 # How to run the code
